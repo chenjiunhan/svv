@@ -18,16 +18,16 @@
 }
 .key-dot {
     display: inline-block;
-    height: 10px;
+    height: 20px;
     margin-right: .5em;
-    width: 10px;
+    width: 20px;
 }
 .rect {
     display: inline-block;
     height: 2px;
     margin-right: .5em;
     margin-bottom: .2em;
-    width: 10px;
+    width: 20px;
 }
 #legend{
 	position: absolute;
@@ -35,11 +35,15 @@
 	top: 10px;
 }
 
+.legend1 {
+    font-size: 20px;
+}
+
 div.tooltip {	
     position: absolute;			
     text-align: center;			
     padding: 2px;				
-    font: 12px sans-serif;		
+    font-size: 20px;
     background: lightsteelblue;	
     border: 0px;		
     border-radius: 8px;			
@@ -137,6 +141,7 @@ d3.csv("cars.csv").then(function(data) {
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
       .call(xAxis)
+      .style('font-size', "20px")
     .append("text")
       .attr("class", "label")
       .attr("x", width)
@@ -144,7 +149,7 @@ d3.csv("cars.csv").then(function(data) {
       .style("text-anchor", "end")
       .text("MPG")
 	  .style('fill', 'darkOrange')
-	  .style('font-size', '20px');
+	  .style('font-size', '30px');
 
 
 
@@ -152,6 +157,8 @@ d3.csv("cars.csv").then(function(data) {
   svg.append("g")
       .attr("class", "y axis")
       .call(yAxis)
+      .style('font-size', "20px")
+
     .append("text")
       .attr("class", "label")
       .attr("transform", "rotate(-90)")
@@ -160,7 +167,7 @@ d3.csv("cars.csv").then(function(data) {
       .style("text-anchor", "end")
       .text("horsepower/weight")
 	  .style('fill', 'darkOrange')
-	  .style('font-size', '20px');
+	  .style('font-size', '30px');
 
 
   // draw dots
@@ -197,8 +204,8 @@ d3.csv("cars.csv").then(function(data) {
           tooltip.transition()
                .duration(200)
                .style("opacity", .9);
-          tooltip.html("Model: " + d.model + "<br/>Year: " + d.year + "<br/> (" + xValue(d) 
-	        + ", " + yValue(d) + ")")
+          tooltip.html("Model: " + d.model + "<br/>Year: " + (1900 + parseInt(d.year)) + "<br/> (" + xValue(d) 
+	        + ", " + Math.round(yValue(d) * 1000) / 1000 + ")")
                .style("left", d3.event.pageX + "px")
                .style("top", d3.event.pageY + "px");
           
@@ -216,7 +223,7 @@ d3.csv("cars.csv").then(function(data) {
       .attr("class", "legend")
       .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 });
-var margin = {top: 20, right: 20, bottom: 30, left: 40},
+var margin = {top: 20, right: 20, bottom: 30, left: 100},
     width = $(window).width() - 100 - margin.left - margin.right,
     height = $(window).height() - 100 - margin.top - margin.bottom;
 
