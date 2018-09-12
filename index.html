@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="http://d3js.org/d3.v5.min.js"></script>
+<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+<style>
+.red { background: #FF0000;}
+.green { background: #00FF00;}
+.blue { background: #0000FF;}
+.black { background: #000000;}
+
+.gradient {
+	background: #000000;
+	background: -moz-linear-gradient(left, #000000 0%, #e5e5e5 100%);
+	background: -webkit-linear-gradient(left, #000000 0%,#e5e5e5 100%);
+	background: linear-gradient(to right, #000000 0%,#e5e5e5 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#000000', endColorstr='#e5e5e5',GradientType=1 );
+}
+.key-dot {
+    display: inline-block;
+    height: 10px;
+    margin-right: .5em;
+    width: 10px;
+}
+.rect {
+    display: inline-block;
+    height: 2px;
+    margin-right: .5em;
+    margin-bottom: .2em;
+    width: 10px;
+}
+#legend{
+	position: absolute;
+	right: 300px;
+	top: 10px;
+}
+
+div.tooltip {	
+    position: absolute;			
+    text-align: center;			
+    padding: 2px;				
+    font: 12px sans-serif;		
+    background: lightsteelblue;	
+    border: 0px;		
+    border-radius: 8px;			
+    pointer-events: none;			
+}
+</style>
+</head>
+<body>
+<script>
+
+year_diff = 0.0;
+year_mean = 0.0;
+
+d3.csv("cars.csv").then(function(data) {
+	xScale.domain([d3.min(data, xValue), d3.max(data, xValue)]);
+	yScale.domain([d3.min(data, yValue), d3.max(data, yValue)]);    
+
+  us_mean = d3.mean(data, usCar)
+  eu_mean = d3.mean(data, euCar)
+  jp_mean = d3.mean(data, jpCar)
+
+  us_y_mean = d3.mean(data, us_yCar)
+  eu_y_mean = d3.mean(data, eu_yCar)
+  jp_y_mean = d3.mean(data, jp_yCar)
+
+  all_mean = d3.mean(data, xValue)
+  console.log(us_mean, all_mean)
+
+  year_max = d3.max(data, yearValue);
+  year_min = d3.min(data, yearValue);
+  year_diff = (year_max - year_min) * 1.0
+  year_mean = d3.mean(data, yearValue)
+
+  var cScale = d3.scaleLinear().domain([year_min, year_max]).range([96, 255])
+
+
+  svg.append("line")
+      .attr("transform", "translate(0," + height + ")")
+      .attr("x1", xScale(us_mean))
+      .attr("x2", xScale(us_mean))
+      .attr("y1", 5)
+      .attr("y2", -height)
+      .attr("stroke", "#0000FF")
+      .attr("stroke-width", 2)
+
+  svg.append("line")
+      .attr("transform", "translate(0," + height + ")")
+      .attr("x1", xScale(eu_mean))
+      .attr("x2", xScale(eu_mean))
+      .attr("y1", 5)
+      .attr("y2", -height)
+      .attr("stroke", "#00FF00")
+      .attr("stroke-width", 2)
+
+  svg.append("line")
+      .attr("transform", "translate(0," + height + ")")
+      .attr("x1", xScale(jp_mean))
+      .attr("x2", xScale(jp_mean))
+      .attr("y1", 5)
+      .attr("y2", -height)
+      .attr("stroke", "#FF0000")
+      .attr("stroke-width", 2)
+
+
+  svg.append("line")
+      .attr("transform", "translate(0," + 0 + ")")
+      .attr("x1", -5)
+      .attr("x2", width)
+      .attr("y1", yScale(us_y_mean))
+      .attr("y2", yScale(us_y_mean))
+      .attr("stroke", "#0000FF")
+      .attr("stroke-width", 2)
+
+  svg.append("line")
+      .attr("transform", "translate(0," + 0 + ")")
+      .attr("x1", -5)
+      .attr("x2", width)
+      .attr("y1", yScale(eu_y_mean))
+      .attr("y2", yScale(eu_y_mean))
+      .attr("stroke", "#00FF00")
+      .attr("stroke-width", 2)
+
+  svg.append("line")
+      .attr("transform", "translate(0," + 0 + ")")
+      .attr("x1", -5)
+      .attr("x2", width)
+      .attr("y1", yScale(jp_y_mean))
+      .attr("y2", yScale(jp_y_mean))
+      .attr("stroke", "#FF0000")
+      .attr("stroke-width", 2)
+
+
+	// x-axis
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+    .append("text")
+      .attr("class", "label")
+      .attr("x", width)
+      .attr("y", -6)
+      .style("text-anchor", "end")
+      .text("MPG")
+	  .style('fill', 'darkOrange')
+	  .style('font-size', '20px');
+
+
+
+  // y-axis
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("class", "label")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("horsepower/weight")
+	  .style('fill', 'darkOrange')
+	  .style('font-size', '20px');
+
+
+  // draw dots
+  svg.selectAll(".dot")
+      .data(data)
+    .enter().append("circle")
+      .attr("class", "dot")
+      .attr("r", 3.5)
+      .attr("cx", xMap)
+      .attr("cy", yMap)
+      //.style("fill", function(d) { return color(cValue(d));}) 
+      .style("fill", function(d) {
+        var r=0, g=0, b=0;
+        switch(d.origin) {
+            case "US":
+                b = parseInt(cScale(parseInt(d.year)))
+                break
+            case "Europe":
+                g = parseInt(cScale(parseInt(d.year)))
+                break
+            case "Japan":
+                r = parseInt(cScale(parseInt(d.year)))
+                break
+        }
+
+        R = r.toString(16).padStart(2,0)
+        G = g.toString(16).padStart(2,0)
+        B = b.toString(16).padStart(2,0)
+        RGB = "#" + R + G + B
+        return RGB
+      }) 
+      .on("mouseover", function(d) {
+          
+          tooltip.transition()
+               .duration(200)
+               .style("opacity", .9);
+          tooltip.html("Model: " + d.model + "<br/>Year: " + d.year + "<br/> (" + xValue(d) 
+	        + ", " + yValue(d) + ")")
+               .style("left", d3.event.pageX + "px")
+               .style("top", d3.event.pageY + "px");
+          
+      })
+      .on("mouseout", function(d) {
+          tooltip.transition()
+               .duration(500)
+               .style("opacity", 0);
+      });
+
+  // draw legend
+  var legend = svg.selectAll(".legend")
+      .data([1,2,3])
+    .enter().append("g")
+      .attr("class", "legend")
+      .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+});
+var margin = {top: 20, right: 20, bottom: 30, left: 40},
+    width = $(window).width() - 100 - margin.left - margin.right,
+    height = $(window).height() - 100 - margin.top - margin.bottom;
+
+var xValue = function(d) { 
+    return parseFloat(d.MPG);}, // data -> value
+    xScale = d3.scaleLinear().range([0, width]), // value -> display
+    xMap = function(d) { return xScale(xValue(d));}, // data -> display
+    xAxis = d3.axisBottom(xScale);
+
+var yValue = function(d) { return parseFloat(d.horsepower) / parseFloat(d.weigth);}, // data -> value
+    yScale = d3.scaleLinear().range([height, 0]), // value -> display
+    yMap = function(d) { return yScale(yValue(d));}, // data -> display
+    yAxis = d3.axisLeft(yScale);
+
+var cValue = function(d) { return d.origin},
+    color = d3.scaleOrdinal()
+        .domain(["US", "Europe", "Japan"])
+        .range(["#0000FF", "#00FF00" , "#FF0000"]);
+
+
+var yearValue = function(d) { return d.year }
+
+var usCar = function(d) {
+    if(d.origin == "US") {
+        return d.MPG
+    } else {
+        return null
+    }
+}
+
+var jpCar = function(d) {
+    if(d.origin == "Japan") {
+        return d.MPG
+    } else {
+        return null
+    }
+}
+
+var euCar = function(d) {
+    if(d.origin == "Europe") {
+        return d.MPG
+    } else {
+        return null
+    }
+}
+
+var us_yCar = function(d) {
+    if(d.origin == "US") {
+        return d.horsepower / d.weigth
+    } else {
+        return null
+    }
+}
+
+var jp_yCar = function(d) {
+    if(d.origin == "Japan") {
+        return d.horsepower / d.weigth
+    } else {
+        return null
+    }
+}
+
+var eu_yCar = function(d) {
+    if(d.origin == "Europe") {
+        return d.horsepower / d.weigth
+    } else {
+        return null
+    }
+}
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom + 30)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+var tooltip = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
+
+
+</script>
+
+<div id="legend">
+     <div class="legend1"> <p class="country-name"><span class="key-dot green"></span>Europe</p> </div>
+     <div class="legend1"> <p class="country-name"><span class="key-dot red"></span>Japan</p> </div>
+     <div class="legend1"> <p class="country-name"><span class="key-dot blue"></span>US</p> </div>
+     <div class="legend1"> <p class="country-name"><span class="key-dot gradient"></span>Brightness: Year of Car</p> </div>
+     <div class="legend1"> <p class="country-name"><span class="rect black"></span>Line: Average Value</p> </div>
+
+	</div>
+
+</body>
+</html>
